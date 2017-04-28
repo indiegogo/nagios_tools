@@ -31,8 +31,10 @@ def usage():
     print '\t\t\t\t\t- --scale{-invert} lets you give thresholds in sane units'
 
 
-def pull_graphite_data(url):
+def pull_graphite_data(url, seconds):
     """Pull down raw data from Graphite"""
+    if seconds > 86400:
+        url = url + "&from=-{}s".format(seconds)
     # Make sure the url ends with '&rawData'
     if not url.endswith('&rawData'):
         url = url + '&rawData'
@@ -82,7 +84,7 @@ def eval_graphite_data(data, seconds):
 def get_hw_value(url, seconds=0):
     """Get the Holt-Winters value from a Graphite graph"""
 
-    data = pull_graphite_data(url)
+    data = pull_graphite_data(url, seconds)
     for line in data.split():
         if line.startswith('holtWintersConfidenceUpper'):
             graphite_upper = eval_graphite_data(line, seconds)
@@ -97,7 +99,7 @@ def get_hw_value(url, seconds=0):
 def get_value(url, seconds=0):
     """Get the value from a Graphite graph"""
 
-    data = pull_graphite_data(url)
+    data = pull_graphite_data(url, seconds)
     data_value = eval_graphite_data(data, seconds)
     return data_value
 
